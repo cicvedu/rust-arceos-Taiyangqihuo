@@ -1,3 +1,5 @@
+// use std::path;
+
 use alloc::collections::BTreeMap;
 use alloc::sync::{Arc, Weak};
 use alloc::{string::String, vec::Vec};
@@ -166,7 +168,18 @@ impl VfsNodeOps for DirNode {
     }
 
     fn rename(&self, _src: &str, _dst: &str) -> VfsResult {
-        todo!("Implement rename for ramfs!");
+        unsafe{
+            // todo!("Implement rename for ramfs!");
+            let c=self.this.upgrade().unwrap();
+            let a=self::VfsNodeOps::lookup(c,_src).unwrap();
+            let (name, rest) = split_path(_dst);
+            let rest=rest.unwrap();
+            self.create(rest, VfsNodeType::Dir);
+            self.children.write().insert(rest.into(), a);
+            // self.create_node(name, VfsNodeType::Dir);
+
+        }
+        Ok(())
     }
 
     axfs_vfs::impl_vfs_dir_default! {}
